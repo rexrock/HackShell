@@ -1,0 +1,29 @@
+功能说明：
+    1.截取shell命令，通过kprobes在系统调用sys_execve前注册探测函数
+    2.将截取的命令输出到用户空间，通过netlink实现，只支持向一个用户进程输出数据
+    3.反汇编查找in指令，由于对反汇编算法研究不够透彻，只好先借助objdump工具反汇编 ^__^
+    4.客户端，将命令和反汇编结果发送到服务器端，暂不支持断线重连
+    5.服务端，接收客户端的数据并以纯文本的格式存储在当前目录的server_data.log中
+
+目录结构：
+    ./modules, 内核模块
+    ./include, 头文件目录
+    ./src    , 用户间的进程源码
+
+编译方法：
+    系统需要有cmake工具
+    在当前目录直接执行release.sh脚本即可
+    编译成功后，在当前目录生成release文件夹
+    release
+    ├── bin
+    │   ├── hack_monitor    # 用户空间程序，从内核接收消息并发送到服务端
+    │   └── hack_server     # 服务端程序
+    └── modules
+        └── do_execve.ko     # 内核模块
+
+测试步骤：
+    1.首先加载内核模块，insmod release/modules/do_execve.ko
+    2.运行服务端程序,   ./release/bin/hack_server 
+    3.运行用户空间程序, ./release/bin/hack_monitor
+
+# 当然程序还存在诸多不足和缺陷，望各位前辈海涵
